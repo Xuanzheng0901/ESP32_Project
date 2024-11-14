@@ -23,7 +23,6 @@ void DHT_Sensor_Init(void)
 
 void DHT_TaskHandle(void *pvParameters)
 {
-    
     while(1)
     {
         DHT_Structure = Get_Temp_Humi();
