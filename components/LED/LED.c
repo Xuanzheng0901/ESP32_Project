@@ -2,7 +2,6 @@
 #include "LED.h"
 #include "driver/ledc.h"
 #include "led_strip.h"
-#include "esp_timer.h"
 
 static led_strip_handle_t led_strip;
 

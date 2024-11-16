@@ -1,10 +1,10 @@
 #include <stdio.h>
 #include "DHT11.h"
 #include "driver/gpio.h"
-#include "esp_rom_sys.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "OLED.h"
+
 static void DHT_Start(void);
 static void DHT_Get_Data(DHT *a);
 DHT aaa, *DHT_Structure;
