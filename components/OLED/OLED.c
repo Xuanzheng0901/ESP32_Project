@@ -20,7 +20,7 @@ static void OLED_W_SDA(uint8_t a)
 {
 	gpio_set_level(SDA, a);
 }
-/*引脚配置*/
+
 static void OLED_I2C_Init()
 {
 	gpio_config_t io_conf;
@@ -36,7 +36,6 @@ static void OLED_I2C_Init()
 	OLED_W_SDA(1);
 }
 
-/*引脚初始化*/
 
 /**
   * @brief  I2C开始
@@ -255,7 +254,6 @@ void OLED2_ShowIcon(uint8_t Line, uint8_t Column, unsigned char Char)
 	{
 		OLED2_WriteData(OLED_F16[Char][i + 16]);		//显示下半部分内容
 	}
-	
 }
 void OLED2_ShowNetIcon(uint8_t Line, uint8_t Column, char *Font)
 {
@@ -275,18 +273,12 @@ void OLED2_ShowNetIcon(uint8_t Line, uint8_t Column, char *Font)
 	for (i = 0; i < 16; i++)
 	{
 		OLED2_WriteData(font_buffer[i]);			//显示上半部分内容
-
-		printf("%d,", font_buffer[i]);
 	}
-	printf("\n");
 	OLED2_SetCursor((Line - 1) * 2 + 1, (Column - 1) * 8);	//设置光标位置在下半部分
 	for (i = 0; i < 16; i++)
 	{
 		OLED2_WriteData(font_buffer[i+16]);		//显示下半部分内容
-
-		printf("%d,",font_buffer[i+16]);
 	}
-	printf("\n");
 	memset(font_buffer, 0, 32 * sizeof(uint8_t));
 	HTTP_Get_Data_Flag = 0;
 }
@@ -322,7 +314,7 @@ void OLED2_ShowString(uint8_t Line, uint8_t Column, char *String)
 //	}
 //}
 
-void OLED_String(int Line, int Column, int Count,int header, ...)
+void OLED_String(int Line, int Column, int Count, int header, ...)
 {
 	int i;
 	va_list String;
@@ -334,7 +326,7 @@ void OLED_String(int Line, int Column, int Count,int header, ...)
 	}
 	va_end(String);
 }
-void OLED2_String(int Line, int Column, int Count,int header, ...)
+void OLED2_String(int Line, int Column, int Count, int header, ...)
 {
 	int i;
 	va_list String;
@@ -347,7 +339,18 @@ void OLED2_String(int Line, int Column, int Count,int header, ...)
 	va_end(String);
 }
 
-
+void OLED2_NetString(uint8_t Line, uint8_t Column, uint8_t Count, char* header, ...)
+{
+	int i;
+	va_list String;
+	va_start(String, header);
+	for(i = 0; i < Count; i++)
+	{
+		OLED2_ShowNetIcon(Line, Column+i*2, header);
+		header=va_arg(String, char*);
+	}
+	va_end(String);
+}
 
 /**
   * @brief  OLED次方函数

@@ -23,6 +23,6 @@ void OLED2_ClearLine(unsigned char x);
 void OLED2_ShowIcon(uint8_t Line, uint8_t Column, unsigned char Char);
 void OLED2_String(int Line, int Column, int Count,int header, ...);
 void OLED2_ShowNetIcon(uint8_t Line, uint8_t Column, char *Font);
-
+void OLED2_NetString(uint8_t Line, uint8_t Column, uint8_t count, char* header, ...);
 uint8_t GetNumLength(uint32_t a);
 #endif

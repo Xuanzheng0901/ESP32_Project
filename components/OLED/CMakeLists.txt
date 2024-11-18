@@ -1,3 +1,3 @@
-idf_component_register(SRCS "OLED.c" "OLED2.c"
+idf_component_register(SRCS "OLED.c"
                     INCLUDE_DIRS "include"
                     REQUIRES driver HTTP)

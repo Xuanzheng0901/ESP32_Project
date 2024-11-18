@@ -12,6 +12,8 @@ char buffer[1024] = {0};
 
 uint8_t font_buffer[32] = {0};
 uint8_t HTTP_Get_Data_Flag = 0;
+esp_http_client_handle_t client;
+
 esp_err_t _http_event_handler(esp_http_client_event_t *evt)
 {
     if(evt->event_id == HTTP_EVENT_ON_DATA)
@@ -22,19 +24,24 @@ esp_err_t _http_event_handler(esp_http_client_event_t *evt)
     return ESP_OK;
 }
 
+void HTTP_Init(void)
+{
+    esp_http_client_config_t config = 
+    {
+        .event_handler = _http_event_handler,
+        .user_data = buffer,
+        .timeout_ms = 500,
+        .method = HTTP_METHOD_GET,
+    };
+    client = esp_http_client_init(&config);
+}
+
 void HTTP_Get_Font(char* string)
 {
     char url[256] = "http://182.92.11.87:5000/font/";
     strcat(url, string);
-    esp_http_client_config_t config = {
-        .url = url,
-        .event_handler = _http_event_handler,
-        .user_data = buffer,        // Pass address of local buffer to get response
-        .timeout_ms = 500,
-        .method = HTTP_METHOD_GET,
-    };
-    esp_http_client_handle_t client = esp_http_client_init(&config);
 
+    esp_http_client_set_url(client, url);
     esp_http_client_perform(client);
     ESP_LOGI(TAG, "%s\n", buffer);
 
