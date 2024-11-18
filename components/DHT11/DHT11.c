@@ -101,5 +101,4 @@ static void DHT_Get_Data(DHT *a)
         a->humidity_h = data[0];
         a->humidity_l = data[1];
     }
-    else printf("数据校验错误!");
 }
