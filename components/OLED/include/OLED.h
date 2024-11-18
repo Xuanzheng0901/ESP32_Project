@@ -15,6 +15,7 @@ void OLED_ClearLine(unsigned char x);
 void OLED_ShowIcon(uint8_t Line, uint8_t Column, unsigned char Char);
 void OLED_String(int Line, int Column, int Count,int header, ...);
 void OLED_ShowNetIcon(uint8_t Line, uint8_t Column, char *Font);
+void OLED_NetString(uint8_t Line, uint8_t Column, char* font);
 
 void OLED2_ShowChar(uint8_t Line, uint8_t Column, char Char);
 void OLED2_ShowString(uint8_t Line, uint8_t Column, char *String);
@@ -23,6 +24,6 @@ void OLED2_ClearLine(unsigned char x);
 void OLED2_ShowIcon(uint8_t Line, uint8_t Column, unsigned char Char);
 void OLED2_String(int Line, int Column, int Count,int header, ...);
 void OLED2_ShowNetIcon(uint8_t Line, uint8_t Column, char *Font);
-void OLED2_NetString(uint8_t Line, uint8_t Column, uint8_t count, char* header, ...);
+void OLED2_NetString(uint8_t Line, uint8_t Column, char* font);
 uint8_t GetNumLength(uint32_t a);
 #endif

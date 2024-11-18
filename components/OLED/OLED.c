@@ -6,6 +6,7 @@
 #include "HTTP.h"
 #include "stdio.h"
 #include "esp_log.h"
+#include "freertos/FreeRTOS.h"
 #define SCL 18
 #define SDA 19
 
@@ -225,18 +226,29 @@ void OLED_ShowIcon(uint8_t Line, uint8_t Column, unsigned char Char)
 
 void OLED_ShowNetIcon(uint8_t Line, uint8_t Column, char *Font)
 {
-	HTTP_Get_Font(Font);
-	while(HTTP_Get_Data_Flag == 0);
+	char encoded_hanzi[10] = {0};
+	char temp_hex[3] = {0};
+	for(int i = 0; i < 3; i++)
+	{
+		snprintf(temp_hex, 3, "%X", Font[i]);
+		strncat(encoded_hanzi, "\%", 2);
+		strncat(encoded_hanzi, temp_hex, 3);
+	}
+	HTTP_Get_Font(encoded_hanzi);
+	while(HTTP_Get_Data_Flag == 0)
+	{
+		vTaskDelay(2);
+	}
 	OLED_SetCursor((Line - 1) * 2, (Column - 1) * 8);		//设置光标位置在上半部分
 	int i = 0;
 	for (i = 0; i < 16; i++)
 	{
-		OLED_WriteData(*(font_buffer + i));			//显示上半部分内容
+		OLED_WriteData(font_buffer[i]);			//显示上半部分内容
 	}
 	OLED_SetCursor((Line - 1) * 2 + 1, (Column - 1) * 8);	//设置光标位置在下半部分
 	for (i = 0; i < 16; i++)
 	{
-		OLED_WriteData(*(font_buffer + i + 16));		//显示下半部分内容
+		OLED_WriteData(font_buffer[i+16]);		//显示下半部分内容
 	}
 	memset(font_buffer, 0, 32 * sizeof(uint8_t));
 	HTTP_Get_Data_Flag = 0;
@@ -265,9 +277,11 @@ void OLED2_ShowNetIcon(uint8_t Line, uint8_t Column, char *Font)
 		strncat(encoded_hanzi, "\%", 2);
 		strncat(encoded_hanzi, temp_hex, 3);
 	}
-	
 	HTTP_Get_Font(encoded_hanzi);
-	while(HTTP_Get_Data_Flag == 0);
+	while(HTTP_Get_Data_Flag == 0)
+	{
+		vTaskDelay(2);
+	}
 	OLED2_SetCursor((Line - 1) * 2, (Column - 1) * 8);		//设置光标位置在上半部分
 	int i = 0;
 	for (i = 0; i < 16; i++)
@@ -339,17 +353,31 @@ void OLED2_String(int Line, int Column, int Count, int header, ...)
 	va_end(String);
 }
 
-void OLED2_NetString(uint8_t Line, uint8_t Column, uint8_t Count, char* header, ...)
+void OLED_NetString(uint8_t Line, uint8_t Column, char* font)
 {
-	int i;
-	va_list String;
-	va_start(String, header);
-	for(i = 0; i < Count; i++)
+	int num =  strlen(font) / 3;
+	char font_temp[4] = {0};
+	for(int i = 0; i < num; i++)
 	{
-		OLED2_ShowNetIcon(Line, Column+i*2, header);
-		header=va_arg(String, char*);
+		vTaskDelay(3);
+		font_temp[0] = font[i*3+0];
+		font_temp[1] = font[i*3+1];
+		font_temp[2] = font[i*3+2]; 
+		OLED_ShowNetIcon(Line, Column+i*2, font_temp);
 	}
-	va_end(String);
+}
+void OLED2_NetString(uint8_t Line, uint8_t Column, char* font)
+{
+	int num =  strlen(font) / 3;
+	char font_temp[4] = {0};
+	for(int i = 0; i < num; i++)
+	{
+		vTaskDelay(3);
+		font_temp[0] = font[i*3+0];
+		font_temp[1] = font[i*3+1];
+		font_temp[2] = font[i*3+2]; 
+		OLED2_ShowNetIcon(Line, Column+i*2, font_temp);
+	}
 }
 
 /**
