@@ -26,9 +26,6 @@ void Get_Smoke_Conc(void *pvParameters)
         int true_voltage = ((double)adc_voltage) / (0.8f * (1- ((double)adc_voltage) / 4130.0f) + 1.0f);
 
         //printf("calied voltage:%d\n真实电压: %d\n", adc_voltage, true_voltage);
-
-
-
         int conc = (int)((double)true_voltage * (10000.0f/3300.0f));
         uint8_t len = GetNumLength(conc);
         if(len <= 4)

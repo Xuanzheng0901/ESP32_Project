@@ -1,10 +1,15 @@
 #include "OLED_Font.h"
 #include <stdarg.h>
+#include <string.h>
 #include "sdkconfig.h"
 #include "driver/gpio.h"
-
+#include "HTTP.h"
+#include "stdio.h"
+#include "esp_log.h"
 #define SCL 18
 #define SDA 19
+
+extern uint8_t font_buffer[32], HTTP_Get_Data_Flag;
 
 static void OLED_W_SCL(uint8_t a)
 {
@@ -167,7 +172,6 @@ void OLED2_Clear(void)
 	}
 }
 
-
 /**
   * @brief  OLED显示一个字符
   * @param  Line 行位置，范围：1~4
@@ -189,6 +193,7 @@ void OLED_ShowChar(uint8_t Line, uint8_t Column, char Char)
 		OLED_WriteData(OLED_F8[Char - ' '][i + 8]);		//显示下半部分内容
 	}
 }
+
 void OLED2_ShowChar(uint8_t Line, uint8_t Column, char Char)
 {      	
 	uint8_t i;
@@ -204,8 +209,6 @@ void OLED2_ShowChar(uint8_t Line, uint8_t Column, char Char)
 	}
 }
 
-
-
 void OLED_ShowIcon(uint8_t Line, uint8_t Column, unsigned char Char)
 {      	
 	uint8_t i;
@@ -220,6 +223,25 @@ void OLED_ShowIcon(uint8_t Line, uint8_t Column, unsigned char Char)
 		OLED_WriteData(OLED_F16[Char][i + 16]);		//显示下半部分内容
 	}
 }
+
+void OLED_ShowNetIcon(uint8_t Line, uint8_t Column, char *Font)
+{
+	HTTP_Get_Font(Font);
+	while(HTTP_Get_Data_Flag == 0);
+	OLED_SetCursor((Line - 1) * 2, (Column - 1) * 8);		//设置光标位置在上半部分
+	int i = 0;
+	for (i = 0; i < 16; i++)
+	{
+		OLED_WriteData(*(font_buffer + i));			//显示上半部分内容
+	}
+	OLED_SetCursor((Line - 1) * 2 + 1, (Column - 1) * 8);	//设置光标位置在下半部分
+	for (i = 0; i < 16; i++)
+	{
+		OLED_WriteData(*(font_buffer + i + 16));		//显示下半部分内容
+	}
+	memset(font_buffer, 0, 32 * sizeof(uint8_t));
+	HTTP_Get_Data_Flag = 0;
+}
 void OLED2_ShowIcon(uint8_t Line, uint8_t Column, unsigned char Char)
 {      	
 	uint8_t i;
@@ -233,6 +255,40 @@ void OLED2_ShowIcon(uint8_t Line, uint8_t Column, unsigned char Char)
 	{
 		OLED2_WriteData(OLED_F16[Char][i + 16]);		//显示下半部分内容
 	}
+	
+}
+void OLED2_ShowNetIcon(uint8_t Line, uint8_t Column, char *Font)
+{
+	char encoded_hanzi[10] = {0};
+	char temp_hex[3] = {0};
+	for(int i = 0; i < 3; i++)
+	{
+		snprintf(temp_hex, 3, "%X", Font[i]);
+		strncat(encoded_hanzi, "\%", 2);
+		strncat(encoded_hanzi, temp_hex, 3);
+	}
+	
+	HTTP_Get_Font(encoded_hanzi);
+	while(HTTP_Get_Data_Flag == 0);
+	OLED2_SetCursor((Line - 1) * 2, (Column - 1) * 8);		//设置光标位置在上半部分
+	int i = 0;
+	for (i = 0; i < 16; i++)
+	{
+		OLED2_WriteData(font_buffer[i]);			//显示上半部分内容
+
+		printf("%d,", font_buffer[i]);
+	}
+	printf("\n");
+	OLED2_SetCursor((Line - 1) * 2 + 1, (Column - 1) * 8);	//设置光标位置在下半部分
+	for (i = 0; i < 16; i++)
+	{
+		OLED2_WriteData(font_buffer[i+16]);		//显示下半部分内容
+
+		printf("%d,",font_buffer[i+16]);
+	}
+	printf("\n");
+	memset(font_buffer, 0, 32 * sizeof(uint8_t));
+	HTTP_Get_Data_Flag = 0;
 }
 /**
   * @brief  OLED显示字符串
