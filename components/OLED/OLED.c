@@ -10,7 +10,7 @@
 #define SCL 18
 #define SDA 19
 
-extern uint8_t font_buffer[32], HTTP_Get_Data_Flag;
+extern char font_buffer[32], HTTP_Get_Data_Flag;
 
 static void OLED_W_SCL(uint8_t a)
 {
@@ -565,12 +565,9 @@ void OLED_Init(void)
 	OLED_WriteCommand(0xAF);	//开启显示
 		
 	OLED_Clear();				//OLED清屏
-	OLED_String(1,1,2,1,2);
-    OLED_ShowChar(1,5,':');
+
     OLED_ShowIcon(1, 11, 6);
     OLED_ShowChar(1, 12, 'C');
-    OLED_String(2,1,2,3,4);
-    OLED_ShowChar(2,5,':');
     OLED_ShowChar(2, 12, '%');
     OLED_ShowChar(1, 9, '.');
     OLED_ShowChar(2, 9, '.');

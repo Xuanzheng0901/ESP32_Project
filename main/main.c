@@ -22,8 +22,7 @@ void app_main(void)
     DHT_Sensor_Init();
     MQ2_Init();
     wifi_init_sta();
-    OLED_String(4, 1, 4, 7, 8, 9, 10);
-    OLED2_ShowString(1,1, "ABCDE");
+    
     
     OLED_ShowChar(3, 9, ':');
     OLED_ShowString(3, 14, "ppm");
@@ -35,11 +34,10 @@ void app_main(void)
     {
         vTaskDelay(10);
     }
-    OLED2_ShowNetIcon(2, 1, "网");
-    OLED2_ShowNetIcon(2, 3, "络");
+    OLED_NetString(1, 1, "室温");
+    OLED_NetString(2, 1, "湿度");
     OLED_NetString(3, 1, "烟雾浓度");
-    OLED2_NetString(3, 1, "获取中文");
-    OLED_NetString(4, 9, "字体");
+    HTTP_Get_Weather("450323");
     while (1) 
     {
         vTaskDelay(100);
