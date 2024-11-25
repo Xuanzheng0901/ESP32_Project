@@ -35,7 +35,7 @@ static void event_handler(void* arg, esp_event_base_t event_base, int32_t event_
     else if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_DISCONNECTED) 
     {
         WIFI_STATU = 0;
-        OLED_ShowString(1, 15, "  ");
+        OLED2_ShowString(1, 15, "  ");
         esp_wifi_connect();
         printf("retry to connect to the AP\n");
     } 

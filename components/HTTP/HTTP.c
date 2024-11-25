@@ -33,7 +33,6 @@ esp_err_t _http_event_handler(esp_http_client_event_t *evt)
             ESP_LOGD(TAG, "HTTP_EVENT_ON_HEADER, key=%s, value=%s", evt->header_key, evt->header_value);
             break;
         case HTTP_EVENT_ON_DATA:
-
             memcpy(evt->user_data, evt->data, evt->data_len);
             ESP_LOGI(TAG, "evt->data:%s", (char*)evt->data);
             memset(evt->data, 0, 256);
@@ -98,6 +97,7 @@ void  HTTP_Get_Weather(char* string)
     static int http_get_flag;
     char url[256] = "http://182.92.11.87:5000/weather/";
     strcat(url, string);
+    
     if(http_get_flag == 0)
     {
         esp_http_client_config_t config = 
@@ -119,6 +119,11 @@ void  HTTP_Get_Weather(char* string)
     }
     
     esp_http_client_perform(weather_client);
+    int statu_code = esp_http_client_get_status_code(weather_client);
+    printf("%d", statu_code);
+
+    if(statu_code != 200)
+        return;
 
     ESP_LOGI(TAG, "buffer:%s", buffer);
 
