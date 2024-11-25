@@ -67,7 +67,6 @@ void wifi_init_sta(void)
     esp_netif_init();
     
     netif_handle = esp_netif_create_default_wifi_sta();
-       // esp_netif_create_ip6_linklocal(netif_handle);
     esp_event_handler_instance_register(WIFI_EVENT, ESP_EVENT_ANY_ID, &event_handler, NULL, &instance_any_id);
     esp_event_handler_instance_register(IP_EVENT, ESP_EVENT_ANY_ID, &event_handler, NULL, &instance_got_ip);
 

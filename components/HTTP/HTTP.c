@@ -34,19 +34,19 @@ esp_err_t _http_event_handler(esp_http_client_event_t *evt)
             break;
         case HTTP_EVENT_ON_DATA:
             memcpy(evt->user_data, evt->data, evt->data_len);
-            ESP_LOGI(TAG, "evt->data:%s", (char*)evt->data);
+            //ESP_LOGI(TAG, "evt->data:%s", (char*)evt->data);
             memset(evt->data, 0, 256);
             buffer[evt->data_len] = 0;
             HTTP_Get_Data_Flag = 1;
             break;
         case HTTP_EVENT_DISCONNECTED:
-            ESP_LOGI(TAG, "HTTP_EVENT_DISCONNECTED");
+            //ESP_LOGI(TAG, "HTTP_EVENT_DISCONNECTED");
             break;
         case HTTP_EVENT_ON_FINISH:
-            ESP_LOGD(TAG, "HTTP_EVENT_ON_FINISH");
+            //ESP_LOGD(TAG, "HTTP_EVENT_ON_FINISH");
             break;
         case HTTP_EVENT_REDIRECT:
-            ESP_LOGD(TAG, "HTTP_EVENT_REDIRECT");
+            //ESP_LOGD(TAG, "HTTP_EVENT_REDIRECT");
             break;
     };
     return ESP_OK;
@@ -67,20 +67,17 @@ void HTTP_Get_Font(char* string)
             .user_data = buffer,
             .timeout_ms = 10000,
             .method = HTTP_METHOD_GET,
-            
         };
         font_client = esp_http_client_init(&config);
         http_get_flag++;
     }
         
     else
-    {
         esp_http_client_set_url(font_client, url);
-    }
     
     esp_http_client_perform(font_client);
 
-    ESP_LOGI(TAG, "buffer:%s", buffer);
+    //ESP_LOGI(TAG, "buffer:%s", buffer);
 
     char* token = strtok(buffer, ", ");
     int i = 0;
@@ -108,24 +105,21 @@ void  HTTP_Get_Weather(char* string)
             .user_data = buffer,
             .timeout_ms = 10000,
             .method = HTTP_METHOD_GET,
-            
         };
         weather_client = esp_http_client_init(&config);
     }
         
     else
-    {
         esp_http_client_set_url(weather_client, url);
-    }
     
     esp_http_client_perform(weather_client);
     int statu_code = esp_http_client_get_status_code(weather_client);
-    printf("%d", statu_code);
+    //printf("%d", statu_code);
 
     if(statu_code != 200)
         return;
 
-    ESP_LOGI(TAG, "buffer:%s", buffer);
+    //ESP_LOGI(TAG, "buffer:%s", buffer);
 
     char* token = strtok(buffer, "@");
     int i = 0;
