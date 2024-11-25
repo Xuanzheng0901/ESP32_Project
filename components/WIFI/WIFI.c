@@ -12,6 +12,7 @@
 #include "OLED.h"
 #include "lwip/err.h"
 #include "lwip/sys.h"
+#include "lwip/dhcp6.h"
 #include "HTTP.h"
 #define WIFI_CONNECTED_BIT BIT0
 #define WIFI_FAIL_BIT      BIT1
@@ -19,6 +20,7 @@
 
 esp_event_handler_instance_t instance_any_id;
 esp_event_handler_instance_t instance_got_ip;
+esp_netif_t *netif_handle;
 
 static const char *TAG = "wifi station";
 
@@ -32,6 +34,8 @@ static void event_handler(void* arg, esp_event_base_t event_base, int32_t event_
     } 
     else if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_DISCONNECTED) 
     {
+        WIFI_STATU = 0;
+        OLED_ShowString(1, 15, "  ");
         esp_wifi_connect();
         printf("retry to connect to the AP\n");
     } 
@@ -41,6 +45,11 @@ static void event_handler(void* arg, esp_event_base_t event_base, int32_t event_
         ESP_LOGI(TAG, "got ip:" IPSTR, IP2STR(&event->ip_info.ip));
         OLED2_ShowIcon(1, 15, 0);
         WIFI_STATU = 1;
+    }
+    else if(event_id == IP_EVENT_GOT_IP6)
+    {
+        for(int i = 0; i < 4; i++)
+            printf("%lx ", ((ip_event_got_ip6_t*)event_data)->ip6_info.ip.addr[i]);
     }
 }
 
@@ -54,11 +63,13 @@ void wifi_init_sta(void)
     }
     WIFI_STATU = 0;
     esp_event_loop_create_default();
-    esp_netif_init();
-    esp_netif_create_default_wifi_sta();
 
+    esp_netif_init();
+    
+    netif_handle = esp_netif_create_default_wifi_sta();
+       // esp_netif_create_ip6_linklocal(netif_handle);
     esp_event_handler_instance_register(WIFI_EVENT, ESP_EVENT_ANY_ID, &event_handler, NULL, &instance_any_id);
-    esp_event_handler_instance_register(IP_EVENT, IP_EVENT_STA_GOT_IP, &event_handler, NULL, &instance_got_ip);
+    esp_event_handler_instance_register(IP_EVENT, ESP_EVENT_ANY_ID, &event_handler, NULL, &instance_got_ip);
 
     wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
     wifi_config_t wifi_config = {

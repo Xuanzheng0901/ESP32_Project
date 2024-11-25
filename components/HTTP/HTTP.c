@@ -111,7 +111,6 @@ void  HTTP_Get_Weather(char* string)
             
         };
         weather_client = esp_http_client_init(&config);
-        
     }
         
     else
@@ -133,8 +132,11 @@ void  HTTP_Get_Weather(char* string)
         i++;
     }
     HTTP_Get_Data_Flag = 0;
+    OLED2_ShowString(1, 1, "              ");
+    OLED2_ShowString(2, 6, "           ");
+    OLED2_ShowString(3, 6, "           ");
     OLED2_NetString(1, 1, weather_buffer[0]);
-    for(int i = 2 + 2 * (strlen(weather_buffer[0]) / 3); i <= 16; i++)
+    for(int i = 2 + 2 * (strlen(weather_buffer[0]) / 3); i <= 14; i++)
     {
         OLED2_ShowChar(1, i, ' ');
     }
@@ -155,11 +157,8 @@ void  HTTP_Get_Weather(char* string)
     }
     OLED2_ShowString(3, 6, weather_buffer[2]);
     int temperature_len = strlen(weather_buffer[2]);
-    if(http_get_flag == 0)
-    {
-        OLED_ShowIcon(1, 11, 6);
-        OLED_ShowChar(1, 12, 'C');
-    }
+    OLED2_ShowIcon(3, 6+temperature_len, 1);
+    OLED2_ShowChar(3, 7+temperature_len, 'C');
     for(int i = 8+temperature_len; i <= 16; i++)
     {
         OLED2_ShowChar(3, i, ' ');

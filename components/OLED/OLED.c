@@ -566,7 +566,9 @@ void OLED_Init(void)
 		
 	OLED_Clear();				//OLED清屏
 
-    OLED_ShowIcon(1, 11, 6);
+	OLED_ShowChar(1, 5, ':');
+	OLED_ShowChar(2, 5, ':');
+    OLED_ShowIcon(1, 11, 1);
     OLED_ShowChar(1, 12, 'C');
     OLED_ShowChar(2, 12, '%');
     OLED_ShowChar(1, 9, '.');

@@ -9,6 +9,7 @@
 #include "WIFI.h"
 #include "MQ-SmokeSensor.h"
 #include "HTTP.h"
+#include "BlueTooth.h"
 
 TaskHandle_t led_handle = NULL, DHT_Handle = NULL, MQ2_Handle = NULL;
 
@@ -38,6 +39,7 @@ void app_main(void)
     OLED_NetString(2, 1, "湿度");
     OLED_NetString(3, 1, "烟雾浓度");
     HTTP_Get_Weather("450323");
+    BT_Init();
     while (1) 
     {
         vTaskDelay(100);
