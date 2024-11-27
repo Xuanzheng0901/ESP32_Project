@@ -5,6 +5,8 @@
 #include "freertos/task.h"
 #include "OLED.h"
 
+#define DHT_IO 0
+
 static void DHT_Start(void);
 static void DHT_Get_Data(DHT *a);
 DHT aaa, *DHT_Structure;
@@ -15,7 +17,7 @@ void DHT_Sensor_Init(void)
     gpio_config_t io_conf;
     io_conf.intr_type = GPIO_INTR_DISABLE;
     io_conf.mode = GPIO_MODE_INPUT_OUTPUT_OD;
-    io_conf.pin_bit_mask = 1ULL<<10;
+    io_conf.pin_bit_mask = 1ULL<<DHT_IO;
     io_conf.pull_down_en = 0;
     io_conf.pull_up_en = 1;
     gpio_config(&io_conf);
@@ -47,9 +49,9 @@ DHT *Get_Temp_Humi(void)
 
 static void DHT_Start(void)
 {
-    gpio_set_level(10, 0);
+    gpio_set_level(DHT_IO, 0);
     vTaskDelay(20 / portTICK_PERIOD_MS);
-    gpio_set_level(10, 1);
+    gpio_set_level(DHT_IO, 1);
     esp_rom_delay_us(15);
 }
 
@@ -60,13 +62,13 @@ static void DHT_Get_Data(DHT *a)
     vTaskSuspend(led_handle);
     for(int i = 0; i < 40; i++)
     {
-        while(gpio_get_level(10) == 0)
+        while(gpio_get_level(DHT_IO) == 0)
         {
             esp_rom_delay_us(1);
         }
         esp_rom_delay_us(40);
-        temp[i] = gpio_get_level(10);
-        while(gpio_get_level(10) == 1)
+        temp[i] = gpio_get_level(DHT_IO);
+        while(gpio_get_level(DHT_IO) == 1)
         {
             esp_rom_delay_us(1);
             jishi++;
