@@ -17,11 +17,15 @@
 #include "esp_gatt_common_api.h"
 #include "sdkconfig.h"
 #include "HTTP.h"
+#include "LED.h"
 
 #define TAG "BLE_LOG"
 #define DEVICE_NAME "ESP32-C6"
 
 char data_buffer[64] = {0};
+
+extern TaskHandle_t led_handle;
+extern uint8_t led_enable;
 
 struct gatts_profile_inst {
     esp_gatts_cb_t gatts_cb;
@@ -45,7 +49,7 @@ static uint8_t adv_service_uuid128[32] = {
     //second uuid, 32bit, [12], [13], [14], [15] is the value
     0xfb, 0x34, 0x9b, 0x5f, 0x80, 0x00, 0x00, 0x80, 0x00, 0x10, 0x00, 0x00, 0xFF, 0x00, 0x00, 0x00,
 };
-static uint8_t serv_uuid128[16] = {0xef, 0x68, 0x01, 0x00, 0x9b, 0x35, 0x49, 0x33, 0x9b, 0x10, 0x52, 0xff, 0xa9, 0x74, 0x00, 0x42};
+//static uint8_t serv_uuid128[16] = {0xef, 0x68, 0x01, 0x00, 0x9b, 0x35, 0x49, 0x33, 0x9b, 0x10, 0x52, 0xff, 0xa9, 0x74, 0x00, 0x42};
 
 
 static esp_ble_adv_params_t adv_params = {
@@ -94,11 +98,14 @@ static void gatts_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_
 
     case ESP_GATTS_CREATE_EVT:
         service_handle = param->create.service_handle;
-        esp_ble_gatts_add_char(service_handle, &((esp_bt_uuid_t){
+        esp_ble_gatts_add_char(service_handle, 
+        &((esp_bt_uuid_t)
+        {
             .len = ESP_UUID_LEN_16,
             .uuid.uuid16 = 0x00
-        }), ESP_GATT_PERM_WRITE | ESP_GATT_PERM_READ, ESP_GATT_CHAR_PROP_BIT_WRITE | ESP_GATT_CHAR_PROP_BIT_READ, NULL,
-            NULL);
+        }), ESP_GATT_PERM_WRITE | ESP_GATT_PERM_READ,
+        ESP_GATT_CHAR_PROP_BIT_WRITE | ESP_GATT_CHAR_PROP_BIT_READ,
+        NULL,NULL);
         esp_ble_gatts_start_service(service_handle); 
         
         break;
@@ -107,12 +114,16 @@ static void gatts_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_
         ESP_LOGI(TAG, "Data received: %.*s", param->write.len, param->write.value);
         strncpy(data_buffer, (char*)param->write.value, param->write.len);
         
-        if (param->write.need_rsp) {
-        esp_ble_gatts_send_response(gatts_if, param->write.conn_id,
-                                    param->write.trans_id, ESP_GATT_OK, "Data Received!");
-        if(param->write.len == 6)
-            HTTP_Get_Weather((char*)param->write.value);
-    }
+        if (param->write.need_rsp) 
+        {
+            esp_ble_gatts_send_response(gatts_if, param->write.conn_id,param->write.trans_id, ESP_GATT_OK, NULL);
+            if(strcmp(data_buffer, "@0000") == 0)
+                LED_Close();
+            else if(strcmp(data_buffer, "@0001") == 0)
+                LED_Restart();
+            else if(param->write.len == 6)
+                HTTP_Get_Weather((char*)param->write.value);
+        }
         break;
     case ESP_GATTS_DISCONNECT_EVT:
         ESP_LOGI(TAG, "ESP_GATTS_DISCONNECT_EVT, disconnect reason 0x%x", param->disconnect.reason);

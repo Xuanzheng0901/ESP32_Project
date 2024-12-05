@@ -3,5 +3,6 @@
 
 void led(void *pvParameters);
 void LED_Init(void);
-
+void LED_Close(void);
+void LED_Restart(void);
 #endif

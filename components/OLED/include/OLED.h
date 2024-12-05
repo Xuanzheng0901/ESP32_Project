@@ -26,4 +26,6 @@ void OLED2_String(int Line, int Column, int Count,int header, ...);
 void OLED2_ShowNetIcon(uint8_t Line, uint8_t Column, char *Font);
 void OLED2_NetString(uint8_t Line, uint8_t Column, char* font);
 uint8_t GetNumLength(uint32_t a);
+
+void OLED2_ShowBigNum(uint8_t Line, uint8_t Column, uint32_t Number);
 #endif
