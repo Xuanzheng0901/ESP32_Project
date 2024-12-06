@@ -12,5 +12,6 @@ typedef struct
 void DHT_Sensor_Init(void);
 DHT *Get_Temp_Humi(void);
 void DHT_TaskHandle(void *pvParameters);
+void Temperature_Warning(void *pvParameters);
 
 #endif

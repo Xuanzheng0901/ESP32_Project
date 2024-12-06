@@ -20,7 +20,7 @@ const adc_oneshot_unit_init_cfg_t adc_init_config =
     .ulp_mode = ADC_ULP_MODE_DISABLE,
 };
 
-static void Beep(uint8_t flag)
+void Beep(uint8_t flag)
 {
     if(flag)
         ledc_timer_resume(LEDC_LOW_SPEED_MODE, LEDC_TIMER_0);

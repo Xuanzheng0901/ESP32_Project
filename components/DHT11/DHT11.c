@@ -4,13 +4,14 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "OLED.h"
-
+#include "LED.h"
 #define DHT_IO 0
 
 static void DHT_Start(void);
 static void DHT_Get_Data(DHT *a);
 DHT aaa, *DHT_Structure;
 extern TaskHandle_t led_handle, DHT_Handle;
+extern void Beep(uint8_t flag);
 
 void DHT_Sensor_Init(void)
 {
@@ -108,5 +109,28 @@ static void DHT_Get_Data(DHT *a)
         a->temperature_l = data[3];
         a->humidity_h = data[0];
         a->humidity_l = data[1];
+    }
+}
+
+void Temperature_Warning(void *pvParameters)
+{
+    while(1)
+    {
+        if(DHT_Structure->temperature_h >= 32)
+        {
+            OLED2_String(3, 3, 2, 2, 3);
+            Beep(1);
+            while(DHT_Structure->temperature_h >= 32)
+            {
+                vTaskDelay(100);
+                LED_Close();
+                vTaskDelay(100);
+                LED_Warning();
+            }
+            Beep(0);
+            OLED2_ShowString(3, 3, "    ");
+            LED_Restart();
+        }
+        vTaskDelay(100);
     }
 }

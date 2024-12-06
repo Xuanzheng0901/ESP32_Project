@@ -11,7 +11,7 @@
 #include "HTTP.h"
 #include "BlueTooth.h"
 
-TaskHandle_t led_handle = NULL, DHT_Handle = NULL, MQ2_Handle = NULL, Time_Task_Handle = NULL, Smoke_Warning_Handle = NULL;
+TaskHandle_t led_handle = NULL, DHT_Handle = NULL, MQ2_Handle = NULL, Time_Task_Handle = NULL, Smoke_Warning_Handle = NULL, Temp_Warning_Handle = NULL;
 
 extern uint8_t WIFI_STATU;
 
@@ -29,7 +29,8 @@ void app_main(void)
     xTaskCreate(led, "led", 4096, NULL, 5, &led_handle);
     xTaskCreate(DHT_TaskHandle, "DHT", 4096, NULL, 5, &DHT_Handle);
     xTaskCreate(Get_Smoke_Conc, "MQ2", 4096, NULL, 5, &MQ2_Handle);
-    xTaskCreate(Smoke_Warning, "Warning", 4096, NULL, 5, &Smoke_Warning_Handle);
+    xTaskCreate(Smoke_Warning, "Smoke_Warning", 4096, NULL, 5, &Smoke_Warning_Handle);
+    xTaskCreate(Temperature_Warning, "Temp_Warning", 4096, NULL, 5, &Temp_Warning_Handle);
     
     while(!WIFI_STATU)
     {
