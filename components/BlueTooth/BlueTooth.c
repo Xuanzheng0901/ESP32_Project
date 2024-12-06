@@ -18,14 +18,14 @@
 #include "sdkconfig.h"
 #include "HTTP.h"
 #include "LED.h"
+#include "OLED.h"
 
 #define TAG "BLE_LOG"
 #define DEVICE_NAME "ESP32-C6"
 
 char data_buffer[64] = {0};
 
-extern TaskHandle_t led_handle;
-extern uint8_t led_enable;
+extern uint8_t Show_Sec;
 
 struct gatts_profile_inst {
     esp_gatts_cb_t gatts_cb;
@@ -121,6 +121,16 @@ static void gatts_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_
                 LED_Close();
             else if(strcmp(data_buffer, "@0001") == 0)
                 LED_Restart();
+            else if(strcmp(data_buffer, "@0002") == 0)
+            {
+                Show_Sec = 0;
+                OLED2_ShowString(1, 9, "    ");
+            }
+            else if(strcmp(data_buffer, "@0003") == 0)
+            {
+                Show_Sec = 1;
+                OLED2_ShowBigNum(1, 6, 10);
+            }
             else if(param->write.len == 6)
                 HTTP_Get_Weather((char*)param->write.value);
         }
@@ -156,5 +166,6 @@ void BT_Init(void)
     
     esp_ble_gatts_app_register(0);
     esp_ble_gatt_set_local_mtu(500);
+    OLED2_ShowIcon(1, 13, 6);
     return;
 }

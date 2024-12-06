@@ -24,17 +24,23 @@ void DHT_Sensor_Init(void)
 }
 
 void DHT_TaskHandle(void *pvParameters)
-{
+{   
+    OLED2_ShowIcon(3, 1, 5);//
+    OLED2_ShowChar(3, 5, '.');
+    OLED2_ShowChar(3, 7, 95 + ' ');
+    OLED2_ShowIcon(3, 10, 4);//
+    OLED2_ShowChar(3, 14, '.');
+    OLED2_ShowChar(3, 16, '%');
     while(1)
     {
         DHT_Structure = Get_Temp_Humi();
-        if(DHT_Structure->temperature_h < 0)
-            OLED_ShowChar(1, 6-3, '-');
-        else OLED_ShowChar(1, 6-3, ' ');
-        OLED_ShowNum(1, 7-3, DHT_Structure->temperature_h, 2);
-        OLED_ShowNum(1, 10-3, DHT_Structure->temperature_l, 1);
-        OLED_ShowNum(2, 7-3, DHT_Structure->humidity_h, 2);
-        OLED_ShowNum(2, 10-3, DHT_Structure->humidity_l, 2);
+        // if(DHT_Structure->temperature_h < 0)
+        //     OLED2_ShowChar(3, 6-3, '-');
+        // else OLED2_ShowChar(3, 6-3, ' ');
+        OLED2_ShowNum(3, 3, DHT_Structure->temperature_h, 2);
+        OLED2_ShowNum(3, 6, DHT_Structure->temperature_l, 1);
+        OLED2_ShowNum(3, 12, DHT_Structure->humidity_h, 2);
+        OLED2_ShowNum(3, 15, DHT_Structure->humidity_l, 1);
         vTaskDelay(3000 / portTICK_PERIOD_MS);
     }
 }

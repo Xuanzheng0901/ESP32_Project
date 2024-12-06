@@ -11,14 +11,20 @@
 char TAG[5] = "HTTP";
 
 char buffer[1024] = {0};
-char Week[][4] = {"SUN", "MON", "TUE", "WED", "THR", "FRI", "SAT"};
 char font_buffer[32] = {0};
-time_t Time = 0;
 char weather_buffer[3][32] = {0};
-uint8_t HTTP_Get_Data_Flag = 0;
+
 esp_http_client_handle_t font_client, weather_client;
+
+uint8_t HTTP_Get_Data_Flag = 0, Show_Sec = 1;
+
+time_t Time = 0;
 struct tm *tm_s;
+static struct tm Current_Time;
+
 extern TaskHandle_t Time_Task_Handle;
+
+
 esp_err_t _http_event_handler(esp_http_client_event_t *evt)
 {
     if(evt->event_id == HTTP_EVENT_ON_DATA) 
@@ -90,7 +96,7 @@ void  HTTP_Get_Weather(char* string)
     else
         esp_http_client_set_url(weather_client, url);
 
-    vTaskSuspend(Time_Task_Handle);
+    //vTaskSuspend(Time_Task_Handle);
     esp_http_client_perform(weather_client);
 
     if(esp_http_client_get_status_code(weather_client) != 200)
@@ -106,32 +112,27 @@ void  HTTP_Get_Weather(char* string)
         i++;
     }
     HTTP_Get_Data_Flag = 0;
-    OLED2_ClearLine(3);
-    OLED2_ShowString(4, 6, "           ");
-    OLED2_NetString(3, 1, weather_buffer[0]);
+    OLED_ClearLine(1);
+    OLED_ShowString(2, 6, "           ");
+    OLED_NetString(1, 1, weather_buffer[0]);
     for(int i = 2 + 2 * (strlen(weather_buffer[0]) / 3); i <= 14; i++)
     {
-        OLED2_ShowChar(3, i, ' ');
+        OLED_ShowChar(1, i, ' ');
     }
-    OLED2_NetString(3, 2 * (strlen(weather_buffer[0]) / 3) + 2, weather_buffer[1]);
-    for(int i = 6 + 2 * (strlen(weather_buffer[1]) / 3); i <= 16; i++)
+    OLED_NetString(1, 2 * (strlen(weather_buffer[0]) / 3) + 2, weather_buffer[1]);
+    for(int i = 8 + 2 * (strlen(weather_buffer[1]) / 3); i <= 16; i++)
     {
-        OLED2_ShowChar(4, i, ' ');
+        OLED_ShowChar(1, i, ' ');
     }
-    // if(http_get_flag == 0)
-    // {
-    //     OLED2_NetString(4, 1, "温度:");
-    //     OLED2_ShowChar(4, 5, ':');
-    // }
-    OLED2_ShowString(4, 1, weather_buffer[2]);
+    OLED_ShowString(2, 1, weather_buffer[2]);
     int temperature_len = strlen(weather_buffer[2]);
-    OLED2_ShowIcon(4, 1+temperature_len, 1);
-    OLED2_ShowChar(4, 2+temperature_len, 'C');
+    OLED_ShowIcon(2, 1+temperature_len, 1);
+    OLED_ShowChar(2, 2+temperature_len, 'C');
     for(int i = 3+temperature_len; i <= 16; i++)
     {
-        OLED2_ShowChar(4, i, ' ');
+        OLED_ShowChar(2, i, ' ');
     } 
-    vTaskResume(Time_Task_Handle);
+    //vTaskResume(Time_Task_Handle);
     http_get_flag++;
 }
 
@@ -155,21 +156,48 @@ void HTTP_Time_Init(void)
 
 void Time_Update(void *pvParameters)
 {
+    OLED2_ShowBigNum(1, 3, 10);
+    OLED2_ShowBigNum(1, 6, 10);
     while(1)
     {
         tm_s = gmtime(&Time);
         tm_s->tm_year += 1900;
         tm_s->tm_mon += 1;
-        char ftime[30];
-        sprintf(ftime, "%2d-%02d %s", tm_s->tm_mon, tm_s->tm_mday, Week[tm_s->tm_wday]);
-        OLED2_ShowString(2, 1, ftime);
-        OLED2_ShowBigNum(1, 1, tm_s->tm_hour / 10);
-        OLED2_ShowBigNum(1, 2, tm_s->tm_hour % 10);
-        OLED2_ShowBigNum(1, 3, 10);
-        OLED2_ShowBigNum(1, 4, tm_s->tm_min / 10);
-        OLED2_ShowBigNum(1, 5, tm_s->tm_min % 10);
-        vTaskDelay(3000); 
-        Time+=30;
+        if(Current_Time.tm_mday != tm_s->tm_mday)
+        {
+            Current_Time.tm_year = tm_s->tm_year;
+            Current_Time.tm_mon = tm_s->tm_mon;
+            Current_Time.tm_wday = tm_s->tm_wday;
+            Current_Time.tm_mday = tm_s->tm_mday;
+            char ftime[40];
+            sprintf(ftime, "%d-%2d-%02d", Current_Time.tm_year, Current_Time.tm_mon, Current_Time.tm_mday);
+            
+            OLED2_ShowString(2, 1, ftime);
+            OLED2_String(2, 12, 2, 21, Current_Time.tm_wday + 22);
+        }
+        if(Current_Time.tm_hour != tm_s->tm_hour)
+        {
+            Current_Time.tm_hour = tm_s->tm_hour;
+            OLED2_ShowBigNum(1, 1, Current_Time.tm_hour / 10);
+            OLED2_ShowBigNum(1, 2, Current_Time.tm_hour % 10);
+        }
+        if(Current_Time.tm_min != tm_s->tm_min)
+        {
+            Current_Time.tm_min = tm_s->tm_min;
+            OLED2_ShowBigNum(1, 4, Current_Time.tm_min / 10);
+            OLED2_ShowBigNum(1, 5, Current_Time.tm_min % 10);
+        }
+
+        if((Current_Time.tm_sec != tm_s->tm_sec) && Show_Sec)
+        {
+            Current_Time.tm_sec = tm_s->tm_sec;
+            OLED2_ShowBigNum(1, 7, Current_Time.tm_sec / 10);
+            OLED2_ShowBigNum(1, 8, Current_Time.tm_sec % 10);
+        }
+        // vTaskDelay(1000); 
+        // vTaskDelay(1000); 
+        vTaskDelay(100); 
+        Time+=1;
     }
         
 }

@@ -354,7 +354,8 @@ void OLED2_ShowNum(uint8_t Line, uint8_t Column, uint32_t Number, uint8_t Length
 {
 	char num[Length+1];
 	memset(num, 0, sizeof(num));
-	OLED_ShowString(Line, Column, num);
+	sprintf(num, "%ld", Number);
+	OLED2_ShowString(Line, Column, num);
 }
 
 void OLED_ClearLine(unsigned char x)
@@ -433,15 +434,15 @@ void OLED_Init(void)
 		
 	OLED_Clear();				//OLED清屏
 
+	OLED_String(3, 1, 7, 7, 8, 9, 10, 11, 12, 13);
+	OLED_ShowChar(3, 15, ',');
+	OLED_String(4, 1, 7, 14, 15, 16, 17, 18, 19, 20);
+	OLED_ShowChar(4, 15, '.');
 	//OLED_ShowChar(1, 5-2, ':');
 	//OLED_ShowChar(2, 5-2, ':');
-    OLED_ShowIcon(1, 11-3, 1);
-    OLED_ShowChar(1, 12-3, 'C');
-    OLED_ShowChar(2, 12-3, '%');
-    OLED_ShowChar(1, 9-3, '.');
-    OLED_ShowChar(2, 9-3, '.');
-	OLED_ShowChar(3, 9, ':');
-    OLED_ShowString(3, 14, "ppm");
+    // OLED_ShowIcon(1, 11-3, 1);
+    // OLED_ShowChar(1, 12-3, 'C');
+	
 }
 
 void OLED2_Init(void)
@@ -494,4 +495,6 @@ void OLED2_Init(void)
 	OLED2_WriteCommand(0xAF);	//开启显示
 		
 	OLED2_Clear();				//OLED清屏
+
+
 }

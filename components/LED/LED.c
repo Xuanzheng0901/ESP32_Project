@@ -84,3 +84,10 @@ void LED_Restart(void)
 {
     led_enable = 1;
 }
+
+void LED_Warning(void)
+{
+    LED_Close();
+    led_strip_set_pixel(led_strip, 0, 255, 0, 0);
+    led_strip_refresh(led_strip);
+}

@@ -1,13 +1,18 @@
 #include "MQ-SmokeSensor.h"
 #include "esp_adc/adc_oneshot.h"
+#include "driver/gpio.h"
+#include "driver/ledc.h"
 #include "OLED.h"
 #include "FreeRTOS/FreeRTOS.h"
 #include <stdio.h>
 #include "esp_log.h"
 #include "esp_err.h"
+#include "LED.h"
+
 adc_oneshot_unit_handle_t adc1_handle;
 adc_cali_handle_t cali_handle = NULL;
 int adc_raw = 0, adc_voltage = 0;
+extern TaskHandle_t MQ2_Handle;
 
 const adc_oneshot_unit_init_cfg_t adc_init_config = 
 {
@@ -15,8 +20,19 @@ const adc_oneshot_unit_init_cfg_t adc_init_config =
     .ulp_mode = ADC_ULP_MODE_DISABLE,
 };
 
+static void Beep(uint8_t flag)
+{
+    if(flag)
+        ledc_timer_resume(LEDC_LOW_SPEED_MODE, LEDC_TIMER_0);
+    else
+        ledc_timer_pause(LEDC_LOW_SPEED_MODE, LEDC_TIMER_0);
+}
+
 void Get_Smoke_Conc(void *pvParameters)
 {
+    
+	OLED2_ShowChar(4, 9, ':');
+    OLED2_ShowString(4, 14, "ppm");
     while(1)
     {
         adc_oneshot_read(adc1_handle, ADC_CHANNEL_2, &adc_raw);
@@ -30,18 +46,17 @@ void Get_Smoke_Conc(void *pvParameters)
         uint8_t len = GetNumLength(conc);
         if(len <= 4)
         {
-            OLED_ShowNum(3, 14-len, conc, len);
+            OLED2_ShowNum(4, 14-len, conc, len);
             for(int i = 0; i < 4-len; i++)
             {
-                OLED_ShowChar(3, 10+i, ' ');
+                OLED2_ShowChar(4, 10+i, ' ');
             }
         }
         else 
         {
-            OLED_String(3, 10, 2, 15, 16);
-            OLED_ShowString(3, 14, "  ");
+            OLED2_String(4, 10, 2, 15, 16);
+            OLED2_ShowString(4, 14, "  ");
         }
-            
         vTaskDelay(2000 / portTICK_PERIOD_MS);
     }
 }
@@ -58,6 +73,32 @@ static void ADC_CALI(void)
     adc_cali_create_scheme_curve_fitting(&cali_config, &cali_handle);
 }
 
+void Beep_Init(void)
+{
+    ledc_timer_config_t pwm_config = 
+    {
+        .speed_mode = LEDC_LOW_SPEED_MODE,
+        .timer_num = 0,
+        .freq_hz = 700,
+        .duty_resolution = 8,
+        .clk_cfg = LEDC_USE_XTAL_CLK
+    };
+    ledc_timer_config(&pwm_config);
+    ledc_timer_pause(LEDC_LOW_SPEED_MODE, LEDC_TIMER_0);
+    ledc_channel_config_t channel_config = 
+    {
+        .channel = 0,
+        .duty = 128,
+        .gpio_num = 4,
+        .hpoint = 0,
+        .flags.output_invert = 1,
+        .timer_sel = LEDC_TIMER_0,
+        .speed_mode = LEDC_LOW_SPEED_MODE,
+    };
+    ledc_channel_config(&channel_config);
+}
+
+
 void MQ2_Init(void)
 {
     adc_oneshot_new_unit(&adc_init_config, &adc1_handle);
@@ -68,4 +109,38 @@ void MQ2_Init(void)
     };
     adc_oneshot_config_channel(adc1_handle, ADC_CHANNEL_2, &adc1_chan_config);
     ADC_CALI();
+    gpio_config_t io_conf;
+    io_conf.intr_type = GPIO_INTR_DISABLE;
+    io_conf.mode = GPIO_MODE_INPUT;
+    io_conf.pin_bit_mask = 1ULL<<3;
+    io_conf.pull_down_en = 0;
+    io_conf.pull_up_en = 1;
+    gpio_config(&io_conf);
+    Beep_Init();
+}
+
+void Smoke_Warning(void *pvParameters)
+{
+    while(1)
+    {
+        if(gpio_get_level(3) == 0)
+        {
+            OLED2_String(4, 10, 2, 2, 3);
+            vTaskSuspend(MQ2_Handle);
+            Beep(1);
+            while(gpio_get_level(3) == 0)
+            {
+                vTaskDelay(100);
+                LED_Close();
+                vTaskDelay(100);
+                LED_Warning();
+            }
+            Beep(0);
+            OLED2_ShowString(4, 10, "    ");
+            vTaskResume(MQ2_Handle);
+            LED_Restart();
+        }
+        vTaskDelay(20);
+    }
+    
 }
