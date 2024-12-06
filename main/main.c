@@ -35,10 +35,6 @@ void app_main(void)
     {
         vTaskDelay(10);
     }
-    // OLED_NetString(1, 1, "室温");
-    
-    // OLED_NetString(2, 1, "湿度");
-    OLED2_NetString(4, 1, "烟雾浓度");
     
     HTTP_Time_Init();
     xTaskCreate(Time_Update, "Time", 4096, NULL, 4, &Time_Task_Handle);

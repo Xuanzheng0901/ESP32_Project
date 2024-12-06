@@ -33,6 +33,7 @@ void Get_Smoke_Conc(void *pvParameters)
     
 	OLED2_ShowChar(4, 9, ':');
     OLED2_ShowString(4, 14, "ppm");
+    OLED2_String(4, 1, 4, 29, 30, 31, 32);
     while(1)
     {
         adc_oneshot_read(adc1_handle, ADC_CHANNEL_2, &adc_raw);
@@ -98,7 +99,6 @@ void Beep_Init(void)
     ledc_channel_config(&channel_config);
 }
 
-
 void MQ2_Init(void)
 {
     adc_oneshot_new_unit(&adc_init_config, &adc1_handle);
@@ -142,5 +142,4 @@ void Smoke_Warning(void *pvParameters)
         }
         vTaskDelay(20);
     }
-    
 }
