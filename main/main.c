@@ -36,11 +36,12 @@ void app_main(void)
     {
         vTaskDelay(10);
     }
-    
+    BT_Init();
     HTTP_Time_Init();
     xTaskCreate(Time_Update, "Time", 4096, NULL, 4, &Time_Task_Handle);
     HTTP_Get_Weather("450323");
-    BT_Init();
+    HTTP_Get_Yiyan();
+    
     
     while (1) 
     {
