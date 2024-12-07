@@ -19,13 +19,15 @@
 #include "HTTP.h"
 #include "LED.h"
 #include "OLED.h"
+#include <time.h>
 
 #define TAG "BLE_LOG"
 #define DEVICE_NAME "ESP32-C6"
 
 char data_buffer[64] = {0};
 
-extern uint8_t Show_Sec;
+extern uint8_t Show_Sec, WIFI_STATU;
+extern struct tm Current_Time;
 
 struct gatts_profile_inst {
     esp_gatts_cb_t gatts_cb;
@@ -130,6 +132,37 @@ static void gatts_event_handler(esp_gatts_cb_event_t event, esp_gatt_if_t gatts_
             {
                 Show_Sec = 1;
                 OLED2_ShowBigNum(1, 6, 10);
+            }
+            else if(strcmp(data_buffer, "@0004") == 0)
+            {
+                HTTP_Get_Yiyan();
+            }
+            else if(strcmp(data_buffer, "@0005") == 0)
+            {
+                OLED2_Init();
+                Current_Time.tm_hour = 25;
+                Current_Time.tm_mday = 32;
+                Current_Time.tm_mon = 13;
+                Current_Time.tm_min = 60;
+                Current_Time.tm_sec = 60;
+                Current_Time.tm_wday = 7;
+                Current_Time.tm_yday = 367;
+                Current_Time.tm_year = 0;
+                OLED2_ShowIcon(3, 1, 5);//
+                OLED2_ShowChar(3, 5, '.');
+                OLED2_ShowChar(3, 7, 95 + ' ');
+                OLED2_ShowIcon(3, 10, 4);//
+                OLED2_ShowChar(3, 14, '.');
+                OLED2_ShowChar(3, 16, '%');
+                OLED2_ShowChar(4, 9, ':');
+                OLED2_ShowString(4, 14, "ppm");
+                OLED2_String(4, 1, 4, 29, 30, 31, 32);
+                OLED2_ShowBigNum(1, 3, 10);
+                if(Show_Sec)
+                    OLED2_ShowBigNum(1, 6, 10);
+                if(WIFI_STATU)
+                    OLED2_ShowIcon(1, 15, 0);
+                OLED2_ShowIcon(1, 13, 6);
             }
             else if(param->write.len == 6)
                 HTTP_Get_Weather((char*)param->write.value);

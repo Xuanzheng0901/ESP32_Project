@@ -20,7 +20,7 @@ uint8_t HTTP_Get_Data_Flag = 0, Show_Sec = 1;
 
 time_t Time = 0;
 struct tm *tm_s;
-static struct tm Current_Time = 
+struct tm Current_Time = 
 {
     .tm_hour = 25,
     .tm_mday = 32,
@@ -33,7 +33,6 @@ static struct tm Current_Time =
 };
 
 extern TaskHandle_t Time_Task_Handle;
-
 
 esp_err_t _http_event_handler(esp_http_client_event_t *evt)
 {
@@ -151,7 +150,7 @@ void HTTP_Get_Yiyan(void)
 {
     start:
     int jishu_flag = 0;
-    char yiyan[2][22] = {0};
+    char yiyan[2][25] = {0};
     char url[] = "http://182.92.11.87:5000/yiyan";
     esp_http_client_config_t config = 
     {
@@ -181,6 +180,8 @@ void HTTP_Get_Yiyan(void)
         
     strncpy(yiyan[0], buffer, len);
     strncpy(yiyan[1], &buffer[len], len + 3*jishu_flag);
+    OLED_ClearLine(3);
+    OLED_ClearLine(4);
     OLED_NetString(3, 1, yiyan[0]);
     OLED_NetString(4, 1, yiyan[1]);
     //ESP_ERROR_CHECK(esp_http_client_close(Yiyan_Handle));
@@ -225,6 +226,7 @@ void Time_Update(void *pvParameters)
             char ftime[40];
             sprintf(ftime, "%d-%2d-%02d", Current_Time.tm_year, Current_Time.tm_mon, Current_Time.tm_mday);
             
+            OLED2_ClearLine(2);
             OLED2_ShowString(2, 1, ftime);
             OLED2_String(2, 12, 2, 21, Current_Time.tm_wday + 22);
         }
@@ -240,7 +242,6 @@ void Time_Update(void *pvParameters)
             OLED2_ShowBigNum(1, 4, Current_Time.tm_min / 10);
             OLED2_ShowBigNum(1, 5, Current_Time.tm_min % 10);
         }
-
         if((Current_Time.tm_sec != tm_s->tm_sec) && Show_Sec)
         {
             Current_Time.tm_sec = tm_s->tm_sec;
@@ -252,5 +253,4 @@ void Time_Update(void *pvParameters)
         vTaskDelay(100); 
         Time+=1;
     }
-        
 }
