@@ -114,6 +114,7 @@ static void DHT_Get_Data(DHT *a)
 
 void Temperature_Warning(void *pvParameters)
 {
+    vTaskDelay(200);
     while(1)
     {
         if(DHT_Structure->temperature_h >= 32)
