@@ -9,7 +9,7 @@
 
 static void DHT_Start(void);
 static void DHT_Get_Data(DHT *a);
-DHT aaa, *DHT_Structure;
+DHT DHT_Data, *DHT_Structure;
 extern TaskHandle_t led_handle, DHT_Handle;
 extern void Beep(uint8_t flag);
 
@@ -26,18 +26,15 @@ void DHT_Sensor_Init(void)
 
 void DHT_TaskHandle(void *pvParameters)
 {   
-    OLED2_ShowIcon(3, 1, 5);//
+    OLED2_ShowIcon(3, 1, 5);
     OLED2_ShowChar(3, 5, '.');
     OLED2_ShowChar(3, 7, 95 + ' ');
-    OLED2_ShowIcon(3, 10, 4);//
+    OLED2_ShowIcon(3, 10, 4);
     OLED2_ShowChar(3, 14, '.');
     OLED2_ShowChar(3, 16, '%');
     while(1)
     {
         DHT_Structure = Get_Temp_Humi();
-        // if(DHT_Structure->temperature_h < 0)
-        //     OLED2_ShowChar(3, 6-3, '-');
-        // else OLED2_ShowChar(3, 6-3, ' ');
         OLED2_ShowNum(3, 3, DHT_Structure->temperature_h, 2);
         OLED2_ShowNum(3, 6, DHT_Structure->temperature_l, 1);
         OLED2_ShowNum(3, 12, DHT_Structure->humidity_h, 2);
@@ -50,8 +47,8 @@ DHT *Get_Temp_Humi(void)
 {
     DHT_Start();
     esp_rom_delay_us(180);
-    DHT_Get_Data(&aaa);
-    return &aaa;
+    DHT_Get_Data(&DHT_Data);
+    return &DHT_Data;
 }
 
 static void DHT_Start(void)
