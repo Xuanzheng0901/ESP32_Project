@@ -1,0 +1,8 @@
+.VSCodeCounter/
+.gitignore
+.gitattributes
+sdkconfig.old
+CMakeLists.txt
+*.lock
+sdkconfig*
+*.csv
