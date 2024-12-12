@@ -13,4 +13,4 @@
   - 获取任意(最小区级)地点天气
   - 开/关时钟显秒
   - 刷新一言
-- 通过后端服务器获取汉字字模(16*16px) 参考项目https://github.com/Xuanzheng0901/Get-Font-Hex
+- 通过后端服务器获取汉字字模(16*16px)<br>(参考项目https://github.com/Xuanzheng0901/Get-Font-Hex)
