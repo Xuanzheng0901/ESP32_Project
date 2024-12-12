@@ -2,4 +2,8 @@ build/
 .vscode/
 .devcontainer/
 .VSCodeCounter/
+.gitignore
+.gitattributes
+sdkconfig.old
+CMakeLists.txt
 *.csv
